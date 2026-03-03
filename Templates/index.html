@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkPulse — Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">DarkPulse</div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+        </ul>
+    </nav>
+    <div class="hero">
+        <h1>Take Control of Your Money</h1>
+        <p>Track every expense. Visualize your habits. Build your future — one entry at a time.</p>
+        <a href="/contact" class="cta-btn">Start Now</a>
+    </div>
+</header>
+
+<form id="income-form" class="income-form">
+  <input id="income" type="number" placeholder="Monthly Income" required />
+  <button type="submit">Set Income</button>
+</form>
+
+<form id="expense-form" class="expense-form">
+  <input id="amount" type="number" placeholder="Amount" required />
+  <input id="category" placeholder="Category" required />
+  <button type="submit">Add Expense</button>
+  <button id="clear-all">Clear All</button>
+</form>
+
+
+<section class="expenses">
+  <h2>Expenses</h2>
+  <ul id="expense-list"></ul>
+</section>
+
+<div id="savings" class="savings"></div>
+
+
+<section id="features" class="features">
+    <h2>Why DarkPulse?</h2>
+    <div class="cards">
+        <div class="card">
+            <h3>💡 Smart Insights</h3>
+            <p>See where your money flows and cut unnecessary costs effortlessly.</p>
+        </div>
+        <div class="card">
+            <h3>📊 Simple Analytics</h3>
+            <p>Visual summaries that keep your spending patterns transparent and actionable.</p>
+        </div>
+        <div class="card">
+            <h3>🔒 Fully Offline</h3>
+            <p>Your data stays local — secure, private, and under your control.</p>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="about">
+    <h2>Built for Simplicity</h2>
+    <p>DarkPulse is designed to be fast, intuitive, and distraction-free.  
+       Whether you’re managing personal budgets or small projects,  
+       it helps you stay focused on what matters — your goals.</p>
+</section>
+
+<section id="cta" class="cta">
+    <h2>Ready to Track Smarter?</h2>
+    <p>Sign up today and take the first step toward financial clarity.</p>
+    <a href="/contact"><button class = "cta-btn ">Join Now</button></a>
+</section>
+
+<footer>
+    <p>© 2025 DarkPulse | Designed by Shanks</p>
+</footer>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

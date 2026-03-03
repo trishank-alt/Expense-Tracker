@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us — DarkPulse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">DarkPulse</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/contact" class="active">Contact</a></li>
+        </ul>
+    </nav>
+    <div class="hero small-hero">
+        <h1>Contact Us</h1>
+        <p>We’d love to hear from you.</p>
+    </div>
+</header>
+
+<section class="contact">
+    <h2>Send a Message</h2>
+
+    <form action="/contact" method="POST" class="contact-form">
+        <input type="text" name="name" placeholder="Your Name" required>
+
+        <input type="email" name="email" placeholder="Your Email" required>
+
+        <textarea name="message" placeholder="Your Message" required></textarea>
+
+        <button type="submit">Send Message</button>
+    </form>
+
+    {% if status %}
+    <p class="status">{{ status }}</p>
+    {% endif %}
+</section>
+
+<footer>
+    <p>© 2025 DarkPulse | Designed by Shanks</p>
+</footer>
+
+</body>
+</html>
