@@ -1,153 +1,194 @@
-# from flask import Flask, jsonify, request, render_template  
-# from expense_tracker.expensetracker import ExpenseTracker
-# app = Flask(__name__)
-# expensetracker = ExpenseTracker()
-# @app.get("/expenses")
-# def get_expenses():
-#     category = request.args.get("category")
-#     if not category:
-#         expenses = expensetracker.get_expenses()
-#     else:
-#         expenses = expensetracker.get_expenses_by_category(category)
-#     if expenses is None:
-#         return jsonify([]), 200
-#     return jsonify(expenses)
-# @app.post("/expenses")
-# def add_expense():
-#     data = request.get_json()
-
-#     if not data:
-#         return jsonify({"error": {
-#             "message" : "JSON body required"
-#             }}), 400
-#     amount = data.get("amount")
-#     category = data.get("category")
-#     notes = data.get("notes", "")
-#     if amount is None or category is None:
-#         return jsonify({"error": {
-#             "message" : "amount and category are required"
-#             }}), 400
-
-#     try:
-#         amount = float(amount)
-#     except ValueError:
-#         return jsonify({"error": {
-#             "message" : "amount must be a number"
-#             }}), 4000
-#     expense = expensetracker.add_expense(amount, category, notes)
-
-#     return jsonify(expense), 201
-
-# @app.delete("/expenses/<int:expense_id>")
-# def delete_expense(expense_id):
-#     success = expensetracker.delete_expense(expense_id)
-#     if not success:
-#         return jsonify({
-#             "error": {
-#                 "message": "expense not found"
-#             }
-#         }), 404
-#     return jsonify({"status": "deleted"}), 200
-
-# @app.get("/expenses/<int:expense_id>")
-# def get_expense(expense_id):
-#     expense = expensetracker.get_expense_by_id(expense_id)
-#     if not expense:
-#         return jsonify({
-#             "error": {
-#                 "message": "expense not found"
-#             }
-#         }), 404
-#     return jsonify(expense), 200
-
-# @app.put("/income")
-# def update_income():
-#     data = request.get_json()
-#     if not data or "income" not in data:
-#         return jsonify({"error": {
-#             "message" : "income is required"
-#             }}), 400    
-#     try:
-#         income = float(data.get("income"))
-#     except ValueError:
-#         return jsonify({"error": {
-#             "message" : "income must be a number"
-#             }}), 400
-#     expensetracker.update_income(income)
-#     return jsonify({"status": "income updated"}), 200
-
-# @app.get("/savings")
-# def get_savings():
-#     savings = expensetracker.get_savings()
-#     return jsonify({"savings": savings}), 200
-
-# @app.get("/")
-# def index():
-#     return render_template("index.html")
-
-# @app.delete("/expenses")
-# def clear_expenses():
-#     expensetracker.clear_expenses()
-#     return jsonify({"status": "all expenses cleared"}), 200
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True)
-
-
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 from expense_tracker.expensetracker import ExpenseTracker
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
-app = FastAPI()
-expensetracker = ExpenseTracker()
+app = FastAPI(title="Expense Tracker API", version="1.0.0")
+expense_tracker = ExpenseTracker()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# ==================== MODELS ====================
 
-class Expense(BaseModel):
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6)
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class ExpenseCreate(BaseModel):
     amount: float = Field(gt=0)
     category: str
-    notes: str = ""
+    notes: Optional[str] = None
+
+# PATCH semantics → all optional
+class ExpenseUpdate(BaseModel):
+    amount: Optional[float] = Field(default=None, gt=0)
+    category: Optional[str] = None
+    notes: Optional[str] = None
+
+class ExpenseResponse(BaseModel):
+    id: int
+    amount: float
+    category: str
+    notes: Optional[str]
+    date: str
+
+class IncomeUpdate(BaseModel):
+    income: float = Field(gt=0)
+
+# ==================== BASIC ====================
 
 @app.get("/")
-def home():
-    return {"message": "Welcome to the Expense Tracker API"}
+def serve_home():
+    return FileResponse("templates/index.html")
+
+# ==================== AUTH ====================
+
+@app.post("/register")
+def register(user: UserRegister):
+    success = expense_tracker.create_user(user.email, user.password)
+
+    if not success:
+        raise HTTPException(400, "Email already exists")
+
+    return {"status": "registered"}
+
+@app.post("/login")
+def login(user: UserLogin):
+    # Later replace with JWT authentication
+    user_id = expense_tracker.verify_user(user.email, user.password)
+
+    if not user_id:
+        raise HTTPException(401, "Invalid credentials")
+
+    return {
+        "status": "success",
+        "user_id": user_id
+    }
+
+# ==================== EXPENSES ====================
 
 @app.post("/users/{user_id}/expenses")
-def add_expense(user_id: int, expense: Expense):
-    return expensetracker.add_expense(user_id, expense.amount, expense.category, expense.notes)
+def add_expense(user_id: int, expense: ExpenseCreate):
+    expense_tracker.add_expense(
+        user_id,
+        expense.amount,
+        expense.category,
+        expense.notes or ""
+    )
 
-# @app.get("/users/{user_id}/expenses")
-# def get_expenses(user_id: int, category: str = None):
-#     if category:
-#         return expensetracker.get_expenses_by_category(user_id, category)
-#     return expensetracker.get_expenses(user_id) or []
+    return {"status": "expense created"}
 
-@app.get("/users/{user_id}/expenses/{expense_id}")
+@app.get(
+    "/users/{user_id}/expenses",
+    response_model=list[ExpenseResponse]
+)
+def get_expenses(user_id: int):
+    return expense_tracker.get_expenses(user_id)
+
+@app.get(
+    "/users/{user_id}/expenses/{expense_id}",
+    response_model=ExpenseResponse
+)
 def get_expense_by_id(user_id: int, expense_id: int):
-    expense = expensetracker.get_expense_by_id(user_id, expense_id)
+    expense = expense_tracker.get_expense_by_id(user_id, expense_id)
+
     if not expense:
-        raise HTTPException(status_code=404, detail="Expense not found")
+        raise HTTPException(404, "Expense not found")
+
     return expense
+
+@app.get(
+    "/users/{user_id}/expenses/category/{category}",
+    response_model=list[ExpenseResponse]
+)
+def get_expenses_by_category(user_id: int, category: str):
+    return expense_tracker.get_expenses_by_category(user_id, category)
+
+@app.patch("/users/{user_id}/expenses/{expense_id}")
+def update_expense(
+    user_id: int,
+    expense_id: int,
+    expense: ExpenseUpdate
+):
+    updated = expense_tracker.edit_expense(
+        user_id,
+        expense_id,
+        new_amount=expense.amount,
+        new_category=expense.category,
+        new_notes=expense.notes
+    )
+
+    if not updated:
+        raise HTTPException(404, "Expense not found")
+
+    return {"status": "expense updated"}
 
 @app.delete("/users/{user_id}/expenses/{expense_id}")
 def delete_expense(user_id: int, expense_id: int):
-    success = expensetracker.delete_expense(user_id, expense_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Expense not found")
-    return {"status": "deleted"}
+    deleted = expense_tracker.delete_expense(user_id, expense_id)
 
-@app.put("/users/{user_id}/income")
-def update_income(user_id: int, income: float = Field(gt=0)):
-    expensetracker.update_income(user_id, income)
-    return {"status": "income updated"}
+    if not deleted:
+        raise HTTPException(404, "Expense not found")
 
-@app.get("/users/{user_id}/savings")
-def get_savings(user_id: int):
-    savings = expensetracker.get_savings(user_id)
-    if savings is None:
-        raise HTTPException(status_code=404, detail="Savings not found")
-    return {"savings": savings}
+    return {"status": "expense deleted"}
 
 @app.delete("/users/{user_id}/expenses")
 def clear_all_expenses(user_id: int):
-    expensetracker.clear_expenses(user_id)
+    expense_tracker.clear_expenses(user_id)
     return {"status": "all expenses cleared"}
+
+# ==================== INCOME ====================
+
+@app.put("/users/{user_id}/income")
+def update_income(user_id: int, data: IncomeUpdate):
+    expense_tracker.update_income(user_id, data.income)
+
+    return {
+        "status": "income updated",
+        "income": data.income
+    }
+
+@app.get("/users/{user_id}/income")
+def get_income(user_id: int):
+    return {
+        "income": expense_tracker.get_income(user_id)
+    }
+
+@app.get("/users/{user_id}/savings")
+def get_savings(user_id: int):
+    return {
+        "savings": expense_tracker.get_savings(user_id)
+    }
+
+# ==================== SUMMARY ====================
+
+@app.get("/users/{user_id}/summary")
+def get_summary(user_id: int):
+    return {
+        "total_expenses": expense_tracker.total_expenses(user_id),
+        "category_summary": expense_tracker.category_summary(user_id),
+        "savings": expense_tracker.get_savings(user_id)
+    }
+
+@app.get("/users/{user_id}/summary/monthly")
+def get_monthly_summary(user_id: int, year: int, month: int):
+    total = expense_tracker.monthly_summary(user_id, year, month)
+
+    return {
+        "year": year,
+        "month": month,
+        "total": total
+    }
+
+# ==================== CLEANUP ====================
+
+@app.delete("/users/{user_id}")
+def delete_user_data(user_id: int):
+    expense_tracker.clear_expenses(user_id)
+    expense_tracker.update_income(user_id, 0)
+
+    return {"status": "user financial data cleared"}

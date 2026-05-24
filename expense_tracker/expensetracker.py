@@ -134,19 +134,13 @@ class ExpenseTracker:
         self.conn.commit()
         return self.cursor.rowcount > 0
 
-    def get_expenses(self, user_id, category=None):
-        if category:
-            self.cursor.execute("""
-                SELECT id, amount, category, notes, date
-                FROM expenses
-                WHERE user_id=? AND category=?
-            """, (user_id, category))
-        else:
-            self.cursor.execute("""
-                SELECT id, amount, category, notes, date
-                FROM expenses
-                WHERE user_id=?
-            """, (user_id,))
+    def get_expenses(self, user_id):
+        
+        self.cursor.execute("""
+            SELECT id, amount, category, notes, date
+            FROM expenses
+            WHERE user_id=?
+        """, (user_id,))
 
         rows = self.cursor.fetchall()
 
@@ -159,6 +153,15 @@ class ExpenseTracker:
         """, (exp_id, user_id))
         row = self.cursor.fetchone()
         return dict(row) if row else None
+
+    def get_expenses_by_category(self, user_id, category):
+        self.cursor.execute("""
+            SELECT id, amount, category, notes, date
+            FROM expenses
+            WHERE user_id=? AND category=?
+        """, (user_id, category))
+        rows = self.cursor.fetchall()
+        return [dict(row) for row in rows]
 
     def total_expenses(self, user_id):
         self.cursor.execute(
@@ -187,7 +190,7 @@ class ExpenseTracker:
             FROM expenses
             WHERE user_id=?
             AND strftime('%Y', date)=?
-            AND strftime('%m', date)=?;
+            AND strftime('%m', date)=?;  
         """, (user_id, str(year), f"{month:02d}"))
 
         row = self.cursor.fetchone()
@@ -203,88 +206,3 @@ class ExpenseTracker:
     # ---------- CLEANUP ----------
     def __del__(self):
         self.conn.close()
-
-# ---------- CLI ----------
-# if __name__ == "__main__":
-#     tracker = ExpenseTracker()
-
-#     income = float(input("Enter your monthly income: "))
-#     tracker.update_income(income)
-#     print(f"Income set to {tracker.get_income()}")
-
-#     while True:
-#         print("\nExpense Tracker Menu:")
-#         print("1. Add Expense")
-#         print("2. Delete Expense")
-#         print("3. Edit Expense")
-#         print("4. View Total Expenses")
-#         print("5. View Savings")
-#         print("6. View Expense by Category")
-#         print("7. View Expense by ID")
-#         print("8. Category Summary")
-#         print("9. Monthly Summary")
-#         print("10. Exit")
-
-#         choice = input("Choose an option: ")
-
-#         if choice == '1':
-#             try:
-#                 amount = float(input("Amount: "))
-#                 category = input("Category: ")
-#                 notes = input("Notes (optional): ")
-#                 tracker.add_expense(amount, category, notes)
-#                 print("Expense added.")
-#             except ValueError:
-#                 print("Invalid amount.")
-
-#         elif choice == '2':
-#             exp_id = input("Enter expense ID to delete: ")
-#             if tracker.delete_expense(exp_id):
-#                 print("Deleted.")
-#             else:
-#                 print("Not found.")
-
-#         elif choice == '3':
-#             exp_id = input("Enter ID to edit: ")
-#             amount = input("New amount (blank to skip): ")
-#             category = input("New category (blank to skip): ")
-#             notes = input("New notes (blank to skip): ")
-#             amount = float(amount) if amount else None
-#             result = tracker.edit_expense(exp_id, amount, category or None, notes or None)
-#             print("Updated." if result else "Nothing changed.")
-
-#         elif choice == '4':
-#             print("Total spent:", tracker.total_expenses())
-
-#         elif choice == '5':
-#             print("Savings left:", tracker.get_savings())
-
-#         elif choice == '6':
-#             cat = input("Category: ")
-#             exps = tracker.get_expenses_by_category(cat)
-#             if not exps:
-#                 print("No expenses in this category.")
-#             for e in exps:
-#                 print(e)
-
-#         elif choice == '7':
-#             exp_id = input("Enter ID: ")
-#             e = tracker.get_expense_by_id(exp_id)
-#             print(e if e else "Not found.")
-
-#         elif choice == '8':
-#             print("\nCategory Summary:")
-#             for cat, total in tracker.category_summary():
-#                 print(f"{cat}: {total}")
-
-#         elif choice == '9':
-#             y = int(input("Year (YYYY): "))
-#             m = int(input("Month (MM): "))
-#             print("Total for that month:", tracker.monthly_summary(y, m))
-
-#         elif choice == '10':
-#             print("Goodbye.")
-#             break
-
-#         else:
-#             print("Invalid choice.")
