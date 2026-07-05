@@ -7,13 +7,14 @@ class ExpenseTracker:
     def __init__(self, db="expenses.db"):
         self.conn = sqlite3.connect(db, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row  # easier dict-like access
-        self.cursor = self.conn.cursor()
+        self.conn.execute("PRAGMA foreign_keys = ON")
         self.setup()
 
     # ---------- SETUP ----------
     def setup(self):
+        cur = self.conn.cursor()
         # USERS
-        self.cursor.execute("""
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT UNIQUE NOT NULL,
@@ -23,7 +24,7 @@ class ExpenseTracker:
         """)
 
         # EXPENSES
-        self.cursor.execute("""
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS expenses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -36,7 +37,7 @@ class ExpenseTracker:
         """)
 
         # SETTINGS (per user)
-        self.cursor.execute("""
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS settings (
                 user_id INTEGER,
                 key TEXT,
@@ -47,7 +48,7 @@ class ExpenseTracker:
         """)
 
         # INDEX (performance)
-        self.cursor.execute("""
+        cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_user_id ON expenses(user_id);
         """)
 
@@ -55,9 +56,11 @@ class ExpenseTracker:
 
     # ---------- AUTH ----------
     def create_user(self, email, password):
+        email = email.lower()
         password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
         try:
-            self.cursor.execute(
+            cur = self.conn.cursor()
+            cur.execute(
                 "INSERT INTO users (email, password_hash) VALUES (?, ?)",
                 (email, password_hash)
             )
@@ -67,11 +70,13 @@ class ExpenseTracker:
             return False  # email already exists
 
     def verify_user(self, email, password):
-        self.cursor.execute(
+        email = email.strip().lower()
+        cur = self.conn.cursor()
+        cur.execute(
             "SELECT id, password_hash FROM users WHERE email=?",
             (email,)
         )
-        row = self.cursor.fetchone()
+        row = cur.fetchone()
 
         if row and bcrypt.checkpw(password.encode(), row["password_hash"]):
             return row["id"]
@@ -79,7 +84,8 @@ class ExpenseTracker:
 
     # ---------- INCOME ----------
     def update_income(self, user_id, new_income):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             INSERT INTO settings (user_id, key, value)
             VALUES (?, 'income', ?)
             ON CONFLICT(user_id, key)
@@ -88,28 +94,36 @@ class ExpenseTracker:
         self.conn.commit()
 
     def get_income(self, user_id):
-        self.cursor.execute(
+        cur = self.conn.cursor()
+        cur.execute(
             "SELECT value FROM settings WHERE user_id=? AND key='income'",
             (user_id,)
         )
-        row = self.cursor.fetchone()
+        row = cur.fetchone()
         return row["value"] if row else 0
 
     # ---------- EXPENSES ----------
     def add_expense(self, user_id, amount, category, notes=""):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             INSERT INTO expenses (user_id, amount, category, notes)
             VALUES (?, ?, ?, ?);
         """, (user_id, amount, category, notes))
         self.conn.commit()
+        cur.execute(
+            "SELECT id, amount, category, notes, date FROM expenses WHERE id=?",
+            (cur.lastrowid,)
+        )
+        return dict(cur.fetchone())
 
     def delete_expense(self, user_id, exp_id):
-        self.cursor.execute(
+        cur = self.conn.cursor()
+        cur.execute(
             "DELETE FROM expenses WHERE id=? AND user_id=?",
             (exp_id, user_id)
         )
         self.conn.commit()
-        return self.cursor.rowcount > 0
+        return cur.rowcount > 0
 
     def edit_expense(self, user_id, exp_id, new_amount=None, new_category=None, new_notes=None):
         updates, params = [], []
@@ -129,63 +143,69 @@ class ExpenseTracker:
 
         params.extend([exp_id, user_id])
 
+        cur = self.conn.cursor()
         sql = f"UPDATE expenses SET {', '.join(updates)} WHERE id=? AND user_id=?"
-        self.cursor.execute(sql, params)
+        cur.execute(sql, params)
         self.conn.commit()
-        return self.cursor.rowcount > 0
+        return cur.rowcount > 0
 
     def get_expenses(self, user_id):
-        
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             SELECT id, amount, category, notes, date
             FROM expenses
             WHERE user_id=?
         """, (user_id,))
 
-        rows = self.cursor.fetchall()
+        rows = cur.fetchall()
 
         return [dict(row) for row in rows]
 
     def get_expense_by_id(self, user_id, exp_id):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             SELECT * FROM expenses
             WHERE id=? AND user_id=?
         """, (exp_id, user_id))
-        row = self.cursor.fetchone()
+        row = cur.fetchone()
         return dict(row) if row else None
 
     def get_expenses_by_category(self, user_id, category):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             SELECT id, amount, category, notes, date
             FROM expenses
             WHERE user_id=? AND category=?
         """, (user_id, category))
-        rows = self.cursor.fetchall()
+        rows = cur.fetchall()
         return [dict(row) for row in rows]
 
     def total_expenses(self, user_id):
-        self.cursor.execute(
+        cur = self.conn.cursor()
+        cur.execute(
             "SELECT SUM(amount) as total FROM expenses WHERE user_id=?",
             (user_id,)
         )
-        row = self.cursor.fetchone()
+        row = cur.fetchone()
         return row["total"] if row["total"] else 0
 
     def get_savings(self, user_id):
         return self.get_income(user_id) - self.total_expenses(user_id)
 
     def category_summary(self, user_id):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             SELECT category, SUM(amount) as total
             FROM expenses
             WHERE user_id=?
             GROUP BY category
             ORDER BY total DESC;
         """, (user_id,))
-        return [dict(row) for row in self.cursor.fetchall()]
+        return [dict(row) for row in cur.fetchall()]
 
     def monthly_summary(self, user_id, year, month):
-        self.cursor.execute("""
+        cur = self.conn.cursor()
+        cur.execute("""
             SELECT SUM(amount) as total
             FROM expenses
             WHERE user_id=?
@@ -193,11 +213,12 @@ class ExpenseTracker:
             AND strftime('%m', date)=?;  
         """, (user_id, str(year), f"{month:02d}"))
 
-        row = self.cursor.fetchone()
+        row = cur.fetchone()
         return row["total"] if row["total"] else 0
 
     def clear_expenses(self, user_id):
-        self.cursor.execute(
+        cur = self.conn.cursor()
+        cur.execute(
             "DELETE FROM expenses WHERE user_id=?",
             (user_id,)
         )
