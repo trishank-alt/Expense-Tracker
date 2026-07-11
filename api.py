@@ -8,13 +8,11 @@ from fastapi.responses import FileResponse
 import jwt
 from datetime import datetime, timedelta, timezone
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 # ==================== CONFIG ====================
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-
-if not SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY is not configured")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
@@ -60,9 +58,15 @@ class IncomeUpdate(BaseModel):
 def create_access_token(user_id: int) -> str:
     payload = {
         "sub": str(user_id),
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "exp": datetime.now(timezone.utc)
+        + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+    return jwt.encode(
+        payload,
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
 
 
 def get_current_user(
@@ -86,6 +90,16 @@ CurrentUser = Annotated[int, Depends(get_current_user)]
 @app.get("/")
 def serve_home():
     return FileResponse("templates/index.html")
+
+
+@app.get("/features")
+def serve_features():
+    return FileResponse("templates/features.html")
+
+
+@app.get("/about")
+def serve_about():
+    return FileResponse("templates/about.html")
 
 # ==================== AUTH ====================
 

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features — DarkPulse</title>
+    <meta name="description" content="Discover the powerful budgeting, tracking, and analytics features of DarkPulse.">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .feature-hero {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(108, 99, 255, 0.12) 0%, transparent 70%);
+        }
+
+        .feature-hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 40%, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-hero p {
+            color: var(--fg2);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-detailed {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5rem;
+        }
+
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .feature-row:nth-child(even) {
+            direction: rtl;
+        }
+
+        .feature-row:nth-child(even) .feature-text {
+            direction: ltr;
+        }
+
+        .feature-text h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--fg);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feature-text h2 span {
+            color: var(--accent);
+        }
+
+        .feature-text p {
+            color: var(--fg2);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-bullets {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-bullets li {
+            font-size: 0.95rem;
+            color: var(--fg2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-bullets li::before {
+            content: "✦";
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .feature-visual {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .feature-visual:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .feature-visual .visual-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-visual .visual-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .feature-visual .visual-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .feature-row {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .feature-row:nth-child(even) {
+                direction: ltr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <header>
+        <nav>
+            <a href="/" class="logo" style="text-decoration:none">DarkPulse</a>
+
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/features" class="active">Features</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+
+            <div id="nav-auth-area">
+                <a href="/#dashboard" class="btn-primary" style="text-decoration:none">Start Tracking</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="feature-hero">
+        <h1>Robust Features for Clean Finance</h1>
+        <p>Explore the details behind DarkPulse’s high-performance expense management and security suite.</p>
+    </section>
+
+    <!-- ==================== DETAILED FEATURES ==================== -->
+    <section class="features-detailed">
+        <!-- Feature 1 -->
+        <div class="feature-row">
+            <div class="feature-text">
+                <h2><span>01.</span> Complete Expense CRUD</h2>
+                <p>
+                    Manage your transaction history effortlessly. DarkPulse lets you log, modify, filter, and clear your
+                    expenses with instantaneous updates.
+                </p>
+                <ul class="feature-bullets">
+                    <li>Log amounts, categories, and optional detailed notes</li>
+                    <li>Edit any logged expense in place with inline modal controls</li>
+                    <li>Category matching and real-time filtering for fast searches</li>
+                    <li>Clear all history or individual transactions safely</li>
+                </ul>
+            </div>
+            <div class="feature-visual">
+                <div class="visual-icon">✏️</div>
+                <div class="visual-label">Expense Management</div>
+                <div class="visual-sub">Create, read, update, and delete in real-time</div>
+            </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-row">
+            <div class="feature-text">
+                <h2><span>02.</span> Smart Category Analytics</h2>
+                <p>
+                    Understand where your money goes. The app auto-aggregates your expenses, grouping them by category
+                    and rendering dynamic visual breakdown bars.
+                </p>
+                <ul class="feature-bullets">
+                    <li>Automated summation per distinct category</li>
+                    <li>Visual percentage indicators based on total spending</li>
+                    <li>Instantly reveals largest spending bottlenecks</li>
+                </ul>
+            </div>
+            <div class="feature-visual">
+                <div class="visual-icon">📊</div>
+                <div class="visual-label">Category Breakdown</div>
+                <div class="visual-sub">Intelligent visual breakdown of your habits</div>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-row">
+            <div class="feature-text">
+                <h2><span>03.</span> Secure JWT Authentication</h2>
+                <p>
+                    Your financial data is sensitive. DarkPulse uses industry-standard JSON Web Token (JWT)
+                    authorization combined with cryptographically hashed passwords on the backend.
+                </p>
+                <ul class="feature-bullets">
+                    <li>Token stored securely in your browser session</li>
+                    <li>Secure bcrypt hashing on database server</li>
+                    <li>Independent secure accounts per user email</li>
+                </ul>
+            </div>
+            <div class="feature-visual">
+                <div class="visual-icon">🔐</div>
+                <div class="visual-label">JSON Web Tokens</div>
+                <div class="visual-sub">State-of-the-art authentication layer</div>
+            </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-row">
+            <div class="feature-text">
+                <h2><span>04.</span> Savings & Income Control</h2>
+                <p>
+                    Set a monthly income target to track your remaining savings automatically. Watch your savings card
+                    color shift based on budget status.
+                </p>
+                <ul class="feature-bullets">
+                    <li>Set and adjust income in a single click</li>
+                    <li>Auto-calculation of monthly savings rate</li>
+                    <li>Color-changing warning states when budget is exceeded</li>
+                </ul>
+            </div>
+            <div class="feature-visual">
+                <div class="visual-icon">💰</div>
+                <div class="visual-label">Income & Savings</div>
+                <div class="visual-sub">Dynamic calculations based on your input</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <p>© 2026 DarkPulse</p>
+    </footer>
+
+</body>
+
+</html>
