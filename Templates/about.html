@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — DarkPulse</title>
+    <meta name="description" content="Learn more about DarkPulse, the premium minimal expense tracker.">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .about-hero {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(108, 99, 255, 0.12) 0%, transparent 70%);
+        }
+
+        .about-hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 40%, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-hero p {
+            color: var(--fg2);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3.5rem;
+        }
+
+        .about-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--fg);
+            margin-bottom: 1.25rem;
+            background: linear-gradient(90deg, var(--fg), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-section p {
+            color: var(--fg2);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .tech-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .tech-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .tech-card .tech-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--fg);
+            margin-bottom: 0.25rem;
+        }
+
+        .tech-card p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <header>
+        <nav>
+            <a href="/" class="logo" style="text-decoration:none">DarkPulse</a>
+
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/features">Features</a></li>
+                <li><a href="/about" class="active">About</a></li>
+            </ul>
+
+            <div id="nav-auth-area">
+                <a href="/#dashboard" class="btn-primary" style="text-decoration:none">Start Tracking</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="about-hero">
+        <h1>Our Story & Mission</h1>
+        <p>Redefining budgeting by putting speed, privacy, and minimalist design first.</p>
+    </section>
+
+    <!-- ==================== ABOUT CONTENT ==================== -->
+    <section class="about-content">
+
+        <div class="about-section">
+            <h2>Our Philosophy</h2>
+            <p>
+                Budgeting shouldn't be a chore. Most modern expense tracking tools are bloated with complex account
+                syncs, aggressive ads, and slow web experiences. We built DarkPulse to offer an alternative: a sleek,
+                rapid-fire dashboard that respects your focus and lets you log transactions in seconds.
+            </p>
+            <p>
+                We believe that visual simplicity fosters consistency. By utilizing clean dashboards, dynamic charts,
+                and distinct cards, you can clearly see where your cash flows without clutter.
+            </p>
+        </div>
+
+        <div class="about-section">
+            <h2>Technology Stack</h2>
+            <p>
+                DarkPulse is powered by a high-performance backend coupled with a modern, framework-free frontend to
+                ensure maximum speed and lightweight loading.
+            </p>
+
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <div class="tech-icon">⚡</div>
+                    <h3>FastAPI</h3>
+                    <p>High-performance Python backend framework.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">💾</div>
+                    <h3>SQLite3</h3>
+                    <p>Lightweight relational data storage.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🎨</div>
+                    <h3>Vanilla CSS</h3>
+                    <p>Highly customized dark-pulse styling.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🔑</div>
+                    <h3>JWT Auth</h3>
+                    <p>Secure login with hashed bcrypt credentials.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2>Privacy First</h2>
+            <p>
+                Unlike many commercial tools, we don't sell your data or harvest your bank details. Your data is stored
+                securely in a sandboxed relational database, accessible only via secure cryptographic access keys. Your
+                financial details remain completely yours.
+            </p>
+        </div>
+
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <p>© 2026 DarkPulse</p>
+    </footer>
+
+</body>
+
+</html>
