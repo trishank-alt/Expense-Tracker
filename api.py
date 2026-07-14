@@ -2,14 +2,16 @@ from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Annotated
-from expense_tracker.expensetracker import ExpenseTracker
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import jwt
 from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
+from expense_tracker.expensetracker import ExpenseTracker
+
 load_dotenv()
+
 # ==================== CONFIG ====================
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
